@@ -13,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u join fetch u.roles WHERE u.phoneNumber = :number")
     Optional<User> findByPhoneNumber(@Param("number") String phoneNumber);
+
+    void deleteById(Long id);
 }
