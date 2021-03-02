@@ -2,18 +2,13 @@ package com.gmail.yuramitryahin.service;
 
 import com.gmail.yuramitryahin.entity.User;
 import com.gmail.yuramitryahin.repository.UserRepository;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+@AllArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     public void add(User user) {
@@ -26,13 +21,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getById(Long id) {
-        return userRepository.findById(id);
+    public User getById(Long id) {
+        return userRepository.findById(id).get();
     }
 
     @Override
-    public Optional<User> getByPhoneNumber(String phoneNumber) {
-        return userRepository.findByPhoneNumber(phoneNumber);
+    public User getByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber).get();
     }
 
     @Override
