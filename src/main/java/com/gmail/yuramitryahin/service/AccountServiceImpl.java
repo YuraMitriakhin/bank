@@ -14,7 +14,7 @@ public class AccountServiceImpl implements AccountService {
     private final UserService userService;
 
     @Override
-    public Account create(Account account) {
+    public Account save(Account account) {
         return accountRepository.save(account);
     }
 
@@ -24,20 +24,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Account> getByUserPhoneNumber(String phoneNumber) {
-        User user = userService.getByPhoneNumber(phoneNumber);
+    public List<Account> getByUser(User user) {
         return accountRepository.getAllByUser(user);
-    }
-
-    @Override
-    public Double getBalance(String accountNumber) {
-        return accountRepository.findById(accountNumber).get().getBalance();
-    }
-
-    @Override
-    public void block(String accountNumber) {
-        Account account = accountRepository.findById(accountNumber).get();
-        account.setActive(false);
-        accountRepository.save(account);
     }
 }

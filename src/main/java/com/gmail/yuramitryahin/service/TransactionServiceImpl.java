@@ -3,6 +3,7 @@ package com.gmail.yuramitryahin.service;
 import com.gmail.yuramitryahin.entity.Account;
 import com.gmail.yuramitryahin.entity.Transaction;
 import com.gmail.yuramitryahin.repository.TransactionRepository;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -16,11 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountService accountService;
-    private final CurrencyTranslation currencyTranslation;
+    private final CurrencyTranslationService currencyTranslation;
 
     @Override
     @Transactional
-    public void createTransfer(String fromAccountNumber, String toAccountNumber, Double amount) {
+    public void createTransfer(String fromAccountNumber, String toAccountNumber,
+                               BigDecimal amount) {
         Account fromAccount = accountService.getByAccountNumber(fromAccountNumber);
         Account toAccount = accountService.getByAccountNumber(toAccountNumber);
         Transaction transactionFromAccount = Transaction.builder()
@@ -28,21 +30,23 @@ public class TransactionServiceImpl implements TransactionService {
                 .toAccount(toAccount)
                 .dateTime(LocalDateTime.now())
                 .amount(amount)
+                .type(Transaction.TransactionType.OUTCOMING)
                 .build();
-        fromAccount.setBalance(fromAccount.getBalance() - amount);
-        accountService.create(fromAccount);
+        fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
+        accountService.save(fromAccount);
         transactionRepository.save(transactionFromAccount);
 
-        Double currencyAmount = currencyTranslation.convert(fromAccount.getCurrency()
+        BigDecimal currencyAmount = currencyTranslation.convert(fromAccount.getCurrency()
                 .getCurrencyType(), toAccount.getCurrency().getCurrencyType(), amount);
         Transaction transactionToAccount = Transaction.builder()
                 .fromAccount(fromAccount)
                 .toAccount(toAccount)
                 .dateTime(LocalDateTime.now())
                 .amount(currencyAmount)
+                .type(Transaction.TransactionType.INCOMING)
                 .build();
-        toAccount.setBalance(toAccount.getBalance() + currencyAmount);
-        accountService.create(toAccount);
+        toAccount.setBalance(toAccount.getBalance().add(currencyAmount));
+        accountService.save(toAccount);
         transactionRepository.save(transactionToAccount);
     }
 

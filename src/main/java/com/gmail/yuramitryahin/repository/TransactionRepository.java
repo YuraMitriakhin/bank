@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    @Query("SELECT t FROM Transaction t JOIN FETCH t.fromAccount fAc JOIN FETCH t.toAccount "
-            + "WHERE fAc.accountNumber = ?1")
+    @Query("SELECT t FROM Transaction t JOIN t.fromAccount fAc JOIN t.toAccount tAc "
+            + "WHERE fAc.accountNumber = ?1 AND tAc.accountNumber = ?1")
     List<Transaction> getAllByAccountNumber(String accountNumber, PageRequest pageable);
 }
