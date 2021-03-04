@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountService accountService;
-    private final CurrencyTranslationService currencyTranslation;
+    private final CurrencyExchangeService currencyTranslation;
 
     @Override
     @Transactional
@@ -36,16 +36,17 @@ public class TransactionServiceImpl implements TransactionService {
         accountService.save(fromAccount);
         transactionRepository.save(transactionFromAccount);
 
-        BigDecimal currencyAmount = currencyTranslation.convert(fromAccount.getCurrency()
+        Number currencyAmount = currencyTranslation.convert(fromAccount.getCurrency()
                 .getCurrencyType(), toAccount.getCurrency().getCurrencyType(), amount);
         Transaction transactionToAccount = Transaction.builder()
                 .fromAccount(fromAccount)
                 .toAccount(toAccount)
                 .dateTime(LocalDateTime.now())
-                .amount(currencyAmount)
+                .amount(BigDecimal.valueOf(currencyAmount.doubleValue()))
                 .type(Transaction.TransactionType.INCOMING)
                 .build();
-        toAccount.setBalance(toAccount.getBalance().add(currencyAmount));
+        toAccount.setBalance(toAccount.getBalance().add(BigDecimal
+                .valueOf(currencyAmount.doubleValue())));
         accountService.save(toAccount);
         transactionRepository.save(transactionToAccount);
     }
